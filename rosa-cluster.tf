@@ -20,14 +20,15 @@ resource "ocm_cluster_rosa_classic" "rosa_sts_cluster" {
     rosa_creator_arn = data.aws_caller_identity.current.arn
   }
 
-  aws_subnet_ids       = var.aws_subnet_ids
+  aws_subnet_ids       = aws_subnet.private[*].id
   compute_machine_type = var.compute_machine_type
-  machine_cidr         = var.machine_cidr
+  machine_cidr         = aws_vpc.main.cidr_block
   multi_az             = true
   replicas             = var.replicas
   sts                  = local.sts_roles
   destroy_timeout      = 60
-  version              = var.openshift_version
+  aws_private_link     = true
+  version              = "openshift-v${var.openshift_version}"
 }
 
 resource "ocm_cluster_wait" "rosa_cluster" {
