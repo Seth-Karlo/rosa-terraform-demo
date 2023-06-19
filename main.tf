@@ -16,3 +16,6 @@ provider "ocm" {
   url   = var.url
 }
 
+provider "aws" {
+  region = var.region_name
+}

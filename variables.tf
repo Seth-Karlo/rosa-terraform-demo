@@ -10,16 +10,15 @@ variable "url" {
 
 variable "operator_role_prefix" {
   type    = string
-  default = ""
 }
 
 variable "account_role_prefix" {
   type    = string
-  default = ""
 }
 
 variable "region_name" {
   type = string
+  default = "eu-west-2"
 }
 
 variable "cluster_name" {
@@ -32,9 +31,20 @@ variable "ocm_environment" {
 }
 
 variable "openshift_version" {
-  default = "4.12"
+  default = "4.12.20"
 }
 
-#variable "installer_role_arn" {
-#  type = string
-#}
+variable "availability_zones" {
+  type    = list(any)
+  default = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
+}
+
+variable "replicas" {
+  type    = number
+  default = 3
+}
+
+variable "compute_machine_type" {
+  type = string
+  default = "m5.xlarge"
+}
