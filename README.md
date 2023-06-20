@@ -13,6 +13,18 @@ Creates:
 
 ## Usage:
 
+*Until the latest version of the provider is pushed to the terraform registry, you will need to build the provider locally*
+
+For Mac for example:
+
+```
+$ brew install golang
+$ git clone https://github.com/terraform-redhat/terraform-provider-ocm
+$ make install
+```
+
+This should build it locally and install it into the correct place in your home directory. Then come back to this repo and:
+
 ```
 terraform init
 terraform apply
