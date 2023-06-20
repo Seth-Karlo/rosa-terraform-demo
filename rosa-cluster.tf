@@ -7,8 +7,9 @@ locals {
       worker_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.account_role_prefix}-Worker-Role"
     },
     operator_role_prefix = var.operator_role_prefix,
-    #oidc_config_id       = ocm_rosa_oidc_config.oidc_config.id
-    oidc_endpoint_url = aws_cloudfront_distribution.oidc_s3_distribution.domain_name
+    # Here we have replaced oidc_config_id with oidc_endpoint_url and oidc_private_key_secret_arn
+    # This is a hack until we can add CloudFront options to the module
+    oidc_endpoint_url = aws_cloudfront_distribution.oidc_s3_distribution.domain_name,
     oidc_private_key_secret_arn = module.oidc_config_input_resources.secret_arn
   }
 }

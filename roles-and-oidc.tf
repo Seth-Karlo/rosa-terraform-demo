@@ -84,14 +84,14 @@ resource "aws_cloudfront_distribution" "oidc_s3_distribution" {
   }
 }
 
-# Create the oidc provier config
-resource "ocm_rosa_oidc_config" "oidc_config" {
-  managed            = false
-  secret_arn         = module.oidc_config_input_resources.secret_arn
-  issuer_url         = aws_cloudfront_distribution.oidc_s3_distribution.domain_name
-  installer_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.account_role_prefix}-Installer-Role"
-  depends_on         = [module.create_account_roles]
-}
+# Create the oidc provider config
+#resource "ocm_rosa_oidc_config" "oidc_config" {
+#  managed            = false
+#  secret_arn         = module.oidc_config_input_resources.secret_arn
+#  issuer_url         = ocm_rosa_oidc_config_input.oidc_input.issuer_url
+#  installer_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.account_role_prefix}-Installer-Role"
+#  depends_on         = [module.create_account_roles]
+#}
 
 # Generate new thumbprint based on CloudFront URL
 # This is a hack until we can add CloudFront options to the module
@@ -101,6 +101,18 @@ data "external" "thumbprint" {
 
 # Overwrite the openid configuration that's in the bucket to use our new CloudFront URL
 # This is a hack until we can add CloudFront options to the module
+#data "aws_s3_object" "openid-configuration" {
+#  bucket = ocm_rosa_oidc_config_input.oidc_input.bucket_name
+#  key    = ".well-known/openid-configuration"
+#}
+
+# Download the object, replace the URL with our new one, and stick it back in the bucket
+# This is a hack until we can add CloudFront options to the module
+#resource "aws_s3_object" "replacement_discover_doc_object" {
+#  bucket  = ocm_rosa_oidc_config_input.oidc_input.bucket_name
+#  key     = ".well-known/openid-configuration"
+#  content = replace(data.aws_s3_object.openid-configuration.body, "${ocm_rosa_oidc_config_input.oidc_input.bucket_name}.s3.${var.region_name}.amazonaws.com" , aws_cloudfront_distribution.oidc_s3_distribution.domain_name)
+#}
 
 # Get information on the operator roles
 data "ocm_rosa_operator_roles" "operator_roles" {
@@ -109,10 +121,13 @@ data "ocm_rosa_operator_roles" "operator_roles" {
 }
 
 # Generate the operator roles and OIDC provider. The operator roles rely on the OIDC provider and the provider relies on the bucket created above
+# In this instance, we have replaced the rh_oidc_provider thumbprint and url with the CloudFront ones
+# This is a hack until we can add CloudFront options to the module
 module "operator_roles_and_oidc_provider" {
   source  = "terraform-redhat/rosa-sts/aws"
   version = ">=0.0.5"
 
+  # This is false because when we don't specify an oidc config the cluster resource will make them
   create_operator_roles = true
   create_oidc_provider  = true
 
@@ -122,6 +137,5 @@ module "operator_roles_and_oidc_provider" {
   #rh_oidc_provider_thumbprint = ocm_rosa_oidc_config.oidc_config.thumbprint
   #rh_oidc_provider_url        = ocm_rosa_oidc_config.oidc_config.oidc_endpoint_url
   operator_roles_properties   = data.ocm_rosa_operator_roles.operator_roles.operator_iam_roles
-  depends_on                  = [ocm_rosa_oidc_config.oidc_config]
 }
 
