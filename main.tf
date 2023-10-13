@@ -4,18 +4,17 @@ terraform {
       source  = "hashicorp/aws"
       version = ">= 4.20.0"
     }
-    ocm = {
-      version = ">=1.0.1"
-      source  = "terraform.local/local/ocm"
+    rhcs = {
+      version = ">= 1.1.0"
+      source  = "terraform-redhat/rhcs"
     }
   }
 }
-
-provider "ocm" {
+provider "rhcs" {
   token = var.token
   url   = var.url
 }
 
 provider "aws" {
-  region = var.region_name
+  region = var.aws_region
 }
